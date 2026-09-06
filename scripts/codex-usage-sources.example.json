@@ -1,0 +1,39 @@
+{
+  "port": 47832,
+  "allowedOrigins": [
+    "https://your-workbench.example.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+  ],
+  "feishuMembership": {
+    "enabled": true,
+    "refreshIntervalMs": 120000
+  },
+  "notifications": {
+    "enabled": true,
+    "cooldownMs": 1800000
+  },
+  "sources": [
+    {
+      "id": "codex-primary",
+      "label": "Codex 账号 1",
+      "accent": "#70b78e",
+      "enabled": true,
+      "codexHome": "D:\\CodexData\\.codex-account-1"
+    },
+    {
+      "id": "codex-secondary",
+      "label": "Codex 账号 2",
+      "accent": "#75a7f0",
+      "enabled": true,
+      "codexHome": "D:\\CodexData\\.codex-account-2"
+    },
+    {
+      "id": "codex-team",
+      "label": "Codex 团队账号",
+      "accent": "#ad8adb",
+      "enabled": false,
+      "codexHome": "D:\\CodexData\\.codex-team"
+    }
+  ]
+}

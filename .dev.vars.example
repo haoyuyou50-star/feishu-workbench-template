@@ -1,0 +1,23 @@
+# Copy to .dev.vars for local development. Never commit real values.
+FEISHU_APP_ID=cli_your_app_id
+FEISHU_APP_SECRET=replace_with_your_app_secret
+
+# Your tenant web origin, used to build Wiki and Bitable links.
+FEISHU_TENANT_ORIGIN=https://your-tenant.feishu.cn
+
+# Optional: explicitly include one user's primary calendar.
+FEISHU_ACTOR_OPEN_ID=
+
+# Optional: comma-separated document search terms shown as recent projects.
+FEISHU_RECENT_DOC_QUERIES=
+
+# Optional award Bitable. Both values are required when enabled.
+FEISHU_AWARDS_APP_TOKEN=
+FEISHU_AWARDS_TABLE_ID=
+
+# Optional course/final-course Bitable. Both values are required when enabled.
+FEISHU_COURSES_APP_TOKEN=
+FEISHU_COURSES_TABLE_ID=
+
+# Optional browser-local usage dashboard endpoint.
+NEXT_PUBLIC_CODEX_USAGE_ENDPOINT=http://127.0.0.1:47832/v1/usage

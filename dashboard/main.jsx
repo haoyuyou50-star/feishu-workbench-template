@@ -56,6 +56,7 @@ import { DEFAULT_WORKBENCH_BOARDS, getBoardDestination, normalizeWorkbenchBoards
 import CoursePlanBoard from "./course-plan.jsx";
 import UsageMonitorBoard from "./usage-monitor.jsx";
 import { deleteAllNoteImages, deleteNoteImage, extractClipboardImages, formatNoteImageSize, listNoteImages, saveNoteImages } from "./note-image-store.js";
+import { taskIsDone, unfinishedTasks, withoutTaskDonePreference } from "./task-list-model.js";
 
 const STORAGE = {
   appearance: "liufeng-workbench.rebuild.appearance.v1",
@@ -2001,10 +2002,6 @@ function taskIsToday(task, pref = {}) {
   return pref.inToday ?? task.defaultToday ?? true;
 }
 
-function taskIsDone(task, pref = {}) {
-  return pref.done ?? task.completed ?? false;
-}
-
 function taskDueCopy(task, includeDate = false) {
   if (!task.due) return "无截止时间";
   const due = new Date(task.due);
@@ -2039,7 +2036,7 @@ function TasksModule({ tasks, query, prefs, setPrefs, todayOrder, setTodayOrder,
   const [announcement, setAnnouncement] = useState("");
   const [completionStages, setCompletionStages] = useState({});
   const completionTimers = useRef(new Map());
-  const todayTasks = tasks.filter((task) => taskIsToday(task, prefs[task.id]));
+  const todayTasks = unfinishedTasks(tasks, prefs).filter((task) => taskIsToday(task, prefs[task.id]));
   const filtered = orderedByIds(todayTasks, todayOrder).filter((task) => task.title.toLowerCase().includes(query.trim().toLowerCase()));
 
   useEffect(() => () => {
@@ -2101,6 +2098,8 @@ function TasksModule({ tasks, query, prefs, setPrefs, todayOrder, setTodayOrder,
     if (!task.guid || !onCompletion) return;
     try {
       await onCompletion(task, !done);
+      clearCompletionAnimation(task.id);
+      setPrefs((current) => withoutTaskDonePreference(current, task.id));
       setAnnouncement(done ? "任务已恢复为未完成" : "任务已同步完成到飞书");
     } catch (error) {
       clearCompletionAnimation(task.id);
@@ -2141,8 +2140,8 @@ function TaskPlannerDialog({ tasks, prefs, setPrefs, todayOrder, setTodayOrder, 
   const { closing, requestClose } = useDialogClose(onClose);
   const panelRef = useRef(null);
   useModalFocus(panelRef);
-  const unfinished = [...tasks].filter((task) => !taskIsDone(task, prefs[task.id])).sort((a, b) => new Date(a.due || 8640000000000000) - new Date(b.due || 8640000000000000));
-  const todayTasks = orderedByIds(tasks.filter((task) => taskIsToday(task, prefs[task.id])), todayOrder);
+  const unfinished = unfinishedTasks(tasks, prefs).sort((a, b) => new Date(a.due || 8640000000000000) - new Date(b.due || 8640000000000000));
+  const todayTasks = orderedByIds(unfinished.filter((task) => taskIsToday(task, prefs[task.id])), todayOrder);
 
   function patchTask(taskId, patch, moveToEnd = false) {
     if (!taskId) return;
@@ -2189,6 +2188,7 @@ function TaskPlannerDialog({ tasks, prefs, setPrefs, todayOrder, setTodayOrder, 
     setPendingTaskIds((current) => new Set(current).add(task.id));
     try {
       await onCompletion(task, !done);
+      setPrefs((current) => withoutTaskDonePreference(current, task.id));
       setAnnouncement(done ? "任务已在飞书恢复为未完成" : "任务已同步完成到飞书");
     } catch (error) {
       setPrefs((current) => {
